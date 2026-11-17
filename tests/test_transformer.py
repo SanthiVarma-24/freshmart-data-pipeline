@@ -143,3 +143,26 @@ def test_missing_columns(transformer, sample_sales):
 
     with pytest.raises(ValueError, match="Missing required columns"):
         transformer.transform_sales(invalid_df)
+
+
+@pytest.mark.parametrize(
+    ("rating", "expected_category"),
+    [
+        (4.9, "Low"),
+        (5.0, "Medium"),
+        (7.0, "Medium"),
+        (7.1, "High"),
+    ],
+)
+def test_rating_category_boundaries(
+    transformer, sample_sales, rating, expected_category
+):
+    """Verify rating classification at category boundaries."""
+
+    test_data = sample_sales.iloc[[0]].copy()
+    test_data["rating"] = rating
+
+    result = transformer.transform_sales(test_data)
+
+    assert result["rating_category"].iloc[0] == expected_category
+
