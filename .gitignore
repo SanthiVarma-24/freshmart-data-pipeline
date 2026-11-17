@@ -1,0 +1,41 @@
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Testing and linting cache
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# IDE and editor settings
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# AWS credentials and local configuration
+.aws/
+
+# Lambda deployment packages
+package/
+*.zip
+
+# Temporary files and logs
+*.log
+*.tmp
