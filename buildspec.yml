@@ -47,6 +47,7 @@ phases:
     commands:
       - echo "FreshMart build completed at $(date -u)"
       - |
+        set -e
         if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ] && [ "${CODEBUILD_WEBHOOK_HEAD_REF:-}" = "refs/heads/main" ]; then
           echo "Deploying FreshMart Lambda functions..."
           bash scripts/deploy.sh csv_reader_lambda dist/csv_reader.zip
