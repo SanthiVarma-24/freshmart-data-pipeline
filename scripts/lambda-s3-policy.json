@@ -1,0 +1,21 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadFreshMartRawData",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": "arn:aws:s3:::freshmart-raw-data-2026/*"
+    },
+    {
+      "Sid": "WriteFreshMartProcessedData",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::freshmart-processed-data-2026/*"
+    }
+  ]
+}

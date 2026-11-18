@@ -1,0 +1,63 @@
+version: 0.2
+
+env:
+  shell: bash
+  variables:
+    AWS_REGION: ap-south-2
+    PYTHON_VERSION: "3.13"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.13
+    commands:
+      - echo "Installing FreshMart development dependencies..."
+      - python -m pip install --upgrade pip
+      - python -m pip install -r requirements-dev.txt
+      - python -m pip install -r lambdas/orchestrator/requirements.txt
+
+  pre_build:
+    commands:
+      - echo "Running syntax checks..."
+      - python -m compileall -q lambdas tests
+      - echo "Running Ruff lint checks..."
+      - ruff check lambdas tests
+      - echo "Running unit tests..."
+      - python -m pytest tests -v
+
+  build:
+    commands:
+      - echo "Packaging FreshMart Lambda functions..."
+      - mkdir -p dist
+      - |
+        for function in csv_reader transformer orchestrator; do
+          echo "Packaging $function..."
+          mkdir -p "package/$function"
+          if [ -f "lambdas/$function/requirements.txt" ]; then
+            python -m pip install \
+              -r "lambdas/$function/requirements.txt" \
+              -t "package/$function"
+          fi
+          cp "lambdas/$function/lambda_function.py" "package/$function/"
+          (cd "package/$function" && zip -qr "../../dist/$function.zip" .)
+        done
+      - echo "Lambda packaging completed."
+
+  post_build:
+    commands:
+      - echo "FreshMart build completed at $(date -u)"
+      - |
+        set -e
+        if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ] && [ "${CODEBUILD_WEBHOOK_HEAD_REF:-}" = "refs/heads/main" ]; then
+          echo "Deploying FreshMart Lambda functions..."
+          bash scripts/deploy.sh csv_reader_lambda dist/csv_reader.zip
+          bash scripts/deploy.sh data_transformer_worker dist/transformer.zip
+          bash scripts/deploy.sh pipeline_orchestrator dist/orchestrator.zip
+        else
+          echo "Skipping deployment: build unsuccessful or not a main-branch webhook build."
+        fi
+
+artifacts:
+  files:
+    - "dist/*.zip"
+  discard-paths: yes

@@ -1,0 +1,16 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeFreshMartWorkers",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": [
+        "arn:aws:lambda:ap-south-2:065241263575:function:csv_reader_lambda",
+        "arn:aws:lambda:ap-south-2:065241263575:function:data_transformer_worker"
+      ]
+    }
+  ]
+}
