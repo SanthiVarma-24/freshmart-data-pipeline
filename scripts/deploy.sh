@@ -47,5 +47,30 @@ aws lambda wait function-updated \
     --function-name "$FUNCTION_NAME" \
     --region "$AWS_REGION"
 
+# Publish a new version and update the live alias
+# only for the durable orchestrator.
+if [[ "$FUNCTION_NAME" == "pipeline_orchestrator" ]]; then
+    echo "Publishing a new orchestrator version..."
+
+    NEW_VERSION=$(aws lambda publish-version \
+        --function-name "$FUNCTION_NAME" \
+        --region "$AWS_REGION" \
+        --query 'Version' \
+        --output text)
+
+    echo "Published version: $NEW_VERSION"
+    echo "Updating live alias..."
+
+    aws lambda update-alias \
+        --function-name "$FUNCTION_NAME" \
+        --name live \
+        --function-version "$NEW_VERSION" \
+        --region "$AWS_REGION" \
+        --query '{Alias:Name,FunctionVersion:FunctionVersion}' \
+        --output json
+
+    echo "Live alias now points to version $NEW_VERSION"
+fi
+
 echo "Deployment completed successfully."
 echo "Finished: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
